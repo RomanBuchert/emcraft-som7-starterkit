@@ -10,13 +10,15 @@
 #include <libopencm3/stm32/fsmc.h>
 #include <libopencm3/stm32/gpio.h>
 
+#include <buttons.h>
 #include <sdram.h>
 #include <lcd.h>
 void SetPixel(size_t x, size_t y, uint32_t c);
 
 void main() {
-	bool DisplayState = true;
+	bool DisplayOn = true;
 	rcc_clock_setup_hse(&rcc_3v3[RCC_CLOCK_3V3_216MHZ], 12);
+	button_init();
 	sdram_init();
 #if 0
 	for(uint32_t* addr = (uint32_t*)0xC0000000; addr < (uint32_t*)0xC4000000; addr++) {
@@ -57,7 +59,15 @@ void main() {
 		SetPixel(480*i/1000, 272*i/1000, 0xFF0000FF);
 		SetPixel(480*i/1000, 272-(272*i/1000), 0xFF00FFFF);
 	}
-	for (;;);
+	for (;;) {
+		if (button_get(USR_BTN1)) {
+			DisplayOn ^= true;
+			while(button_get(USR_BTN1)) {
+				;
+			}
+			lcd_set_backlight(DisplayOn);
+		}
+	}
 }
 
 void SetPixel(size_t x, size_t y, uint32_t c) {

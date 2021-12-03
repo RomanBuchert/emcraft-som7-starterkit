@@ -16,6 +16,7 @@ add_executable(${THIS_TARGET_NAME}
 	sdram.c
 	lcd.c
 	rcc.c
+	buttons.c
 	
 )
 target_link_options(${THIS_TARGET_NAME}
