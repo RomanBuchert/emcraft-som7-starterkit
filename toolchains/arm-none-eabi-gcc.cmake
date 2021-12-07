@@ -20,9 +20,7 @@ set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type")
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${TC_BUILDTYPES})
 
 # Toolchain path
-set(TC_TOOLCHAIN_PATH ""
-	CACHE PATH "Path to toolchain"
-)
+set(TC_TOOLCHAIN_PATH "" CACHE PATH "Path to toolchain")
 
 # Optimization
 set(TC_OPTIMIZATION

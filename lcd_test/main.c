@@ -9,56 +9,52 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/fsmc.h>
 #include <libopencm3/stm32/gpio.h>
-
+#include <libopencm3/cm3/vector.h>
+#include <i2c.h>
 #include <buttons.h>
 #include <sdram.h>
+#include <gt911.h>
 #include <lcd.h>
+#include <systimer.h>
+
 void SetPixel(size_t x, size_t y, uint32_t c);
+
+void int2led(void) {
+	if (gpio_get(GPIOI, GPIO10)) {
+		gpio_set(GPIOD, GPIO3);
+	}
+	else {
+		gpio_clear(GPIOD, GPIO3);
+	}
+}
 
 void main() {
 	bool DisplayOn = true;
 	rcc_clock_setup_hse(&rcc_3v3[RCC_CLOCK_3V3_216MHZ], 12);
+	rcc_periph_clock_enable(RCC_GPIOD);
+	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO3);
+	gpio_set_output_options(GPIOD, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, GPIO3);
+	gpio_clear(GPIOD, GPIO3);
+	systimer_init();
+	i2c_init_regs();
 	button_init();
 	sdram_init();
+	/*
+	while(!button_get(USR_BTN1)) {
+		;
+	}
+	 */
+	lcd_init();
+	lcd_set_backlight(0);
+	gt911_init();
 #if 0
 	for(uint32_t* addr = (uint32_t*)0xC0000000; addr < (uint32_t*)0xC4000000; addr++) {
 		*addr = 0;
 	}
-#endif
 	for (uint32_t* addr = (uint32_t*)0xC0000000; addr < (uint32_t*)(0xC0000000 + (480*272*4)); addr++) {
 		*addr = 0xFF000000;
 	}
-	lcd_init();
 
-	uint32_t* addr = (uint32_t*) 0xC0000000;
-	uint32_t clut[8] = {
-			0xFF0000FF,
-			0xFF00FF00,
-			0xFFFF0000,
-			0xFF00FFFF,
-			0xFFFF00FF,
-			0xFFFFFF00,
-			0xFF000000,
-			0xFFFFFFFF
-	};
-
-	for (size_t x = 0; x < 480; x++) {
-		SetPixel(x,0,0xFF0000 | (uint32_t)(255UL*x/480UL)<<24);
-		SetPixel(x,1,0xFF0000 | (uint32_t)(255UL*x/480UL)<<24);
-		SetPixel(x,2,0xFF0000 | (uint32_t)(255UL*x/480UL)<<24);
-		SetPixel(x,271,0xFFFFFF00);
-		SetPixel(x,270,0xFFFFFF00);
-	}
-	for (size_t y = 0; y < 272; y++) {
-		SetPixel(0,y, 0xFF00FF00);
-		SetPixel(1,y, 0xFF00FF00);
-		SetPixel(478,y,0xFFFF00FF);
-		SetPixel(479,y,0xFFFF00FF);
-	}
-	for (size_t i = 0; i < 1000; i++) {
-		SetPixel(480*i/1000, 272*i/1000, 0xFF0000FF);
-		SetPixel(480*i/1000, 272-(272*i/1000), 0xFF00FFFF);
-	}
 	for (;;) {
 		if (button_get(USR_BTN1)) {
 			DisplayOn ^= true;
@@ -67,6 +63,36 @@ void main() {
 			}
 			lcd_set_backlight(DisplayOn);
 		}
+	}
+#endif
+	char tmp = 0;
+
+	uint16_t gt911_info_data[22];
+	volatile int retval;
+	uint64_t cntr = 0;
+	retval = gt911_write(0x8040, &tmp, 1);
+	if (retval != 0) {
+		gt911_init();
+	}
+	for (;;) {
+		while (gpio_get(GPIOI, GPIO10) == 0) {
+			;
+		}
+		cntr++;
+		retval = gt911_read(0x814E, gt911_info_data, 42);
+		if (retval != 0) {
+			gt911_init();
+		}
+		else {
+			if (gt911_info_data[0] & 0x80) {
+				retval = gt911_write(0x814E, &tmp, 0);
+			}
+			if (retval != 0) {
+				gt911_init();
+			}
+		}
+		while(gpio_get(GPIOI, GPIO10));
+		systimer_delay_ms(100);
 	}
 }
 

@@ -12,12 +12,14 @@ set(LCD_TEST_XRAM_START "0xC0000000" CACHE STRING "External RAM start address.")
 set(LCD_TEST_XRAM_SIZE "8M" CACHE STRING "External RAM size.")
 
 add_executable(${THIS_TARGET_NAME} 
-	main.c
-	sdram.c
-	lcd.c
-	rcc.c
-	buttons.c
-	
+	main.c				# Main
+	systimer.c			# System timer functions 
+	rcc.c				# Further clock configuration functions for SAI clock tree
+	i2c.c				# Further i2c functions not implemente in libopencm3
+	sdram.c				# SDRAM initialization. SDRAM is mapped to addr. 0xc0000000
+	lcd.c				# STM32F7 LTDC initialization for em-craft module
+	gt911.c				# Touch driver on em-craft module
+	buttons.c			# Simple functions for hardware user buttons 1  & 2  
 )
 target_link_options(${THIS_TARGET_NAME}
 	PRIVATE -T stm32f746ng.ld -Wl,-Map=${THIS_TARGET_NAME}.map
@@ -33,3 +35,4 @@ add_custom_command(TARGET ${THIS_TARGET_NAME}
 	COMMAND ${CMAKE_SIZE} ARGS -B -x --totals ${CMAKE_CURRENT_BINARY_DIR}/${THIS_TARGET_NAME}
 	COMMAND ${CMAKE_SIZE} ARGS -G -x --totals ${CMAKE_CURRENT_BINARY_DIR}/${THIS_TARGET_NAME}
 )
+
