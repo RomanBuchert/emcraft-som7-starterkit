@@ -6,7 +6,6 @@
  */
 
 #include <rcc.h>
-#include <libopencm3/stm32/rcc.h>
 
 uint32_t sai_p_freq;
 uint32_t sai_q_freq;

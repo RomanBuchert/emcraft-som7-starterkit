@@ -21,12 +21,15 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="de.marw.cmake.cdt.lsp.buildArtefactType.cmake" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=de.marw.cmake.cdt.lsp.buildArtefactType.cmake,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" description="" id="de.marw.cmake.cdt.lsp.config.debug.213749388" name="Debug" parent="de.marw.cmake.cdt.lsp.config.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="de.marw.cmake.cdt.lsp.buildArtefactType.cmake" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=de.marw.cmake.cdt.lsp.buildArtefactType.cmake,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" description="" id="de.marw.cmake.cdt.lsp.config.debug.213749388" name="Debug" optionalBuildProperties="" parent="de.marw.cmake.cdt.lsp.config.debug">
 					<folderInfo id="de.marw.cmake.cdt.lsp.config.debug.213749388." name="/" resourcePath="">
 						<toolChain id="de.marw.cmake.cdt.lsp.config.debug.toolChain.1285386354" name="CMake driven" superClass="de.marw.cmake.cdt.lsp.config.debug.toolChain">
 							<targetPlatform id="de.marw.cmake.cdt.lsp.targetPlatform.cmake.359093023" name="Any Platform" superClass="de.marw.cmake.cdt.lsp.targetPlatform.cmake"/>
 							<builder buildPath="/lcd/build/Debug" id="de.marw.cmake.cdt.lsp.builder.portable.243267062" managedBuildOn="true" name="CMake Builder.Debug" superClass="de.marw.cmake.cdt.lsp.builder.portable"/>
-							<tool id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy.167005487" name="CMake driven Languages Proxy" superClass="de.marw.cmake.cdt.lsp.toolchain.tool.dummy"/>
+							<tool id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy.167005487" name="CMake driven Languages Proxy" superClass="de.marw.cmake.cdt.lsp.toolchain.tool.dummy">
+								<inputType id="de.marw.cmake.cdt.lsp.inputType.c.344479412" superClass="de.marw.cmake.cdt.lsp.inputType.c"/>
+								<inputType id="de.marw.cmake.cdt.lsp.inputType.cpp.1033762544" superClass="de.marw.cmake.cdt.lsp.inputType.cpp"/>
+							</tool>
 						</toolChain>
 					</folderInfo>
 				</configuration>
@@ -58,7 +61,10 @@
 						<toolChain id="de.marw.cmake.cdt.lsp.config.cmake.toolChain.645650469" name="CMake driven" superClass="de.marw.cmake.cdt.lsp.config.cmake.toolChain">
 							<targetPlatform id="de.marw.cmake.cdt.lsp.targetPlatform.cmake.1987553794" name="Any Platform" superClass="de.marw.cmake.cdt.lsp.targetPlatform.cmake"/>
 							<builder buildPath="/lcd/build/Default" id="de.marw.cmake.cdt.lsp.builder.portable.601730948" managedBuildOn="true" name="CMake Builder.Default" superClass="de.marw.cmake.cdt.lsp.builder.portable"/>
-							<tool id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy.91433324" name="CMake driven Languages Proxy" superClass="de.marw.cmake.cdt.lsp.toolchain.tool.dummy"/>
+							<tool id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy.91433324" name="CMake driven Languages Proxy" superClass="de.marw.cmake.cdt.lsp.toolchain.tool.dummy">
+								<inputType id="de.marw.cmake.cdt.lsp.inputType.c.1050158572" superClass="de.marw.cmake.cdt.lsp.inputType.c"/>
+								<inputType id="de.marw.cmake.cdt.lsp.inputType.cpp.500177555" superClass="de.marw.cmake.cdt.lsp.inputType.cpp"/>
+							</tool>
 						</toolChain>
 					</folderInfo>
 				</configuration>
@@ -90,19 +96,18 @@
 						<toolChain id="de.marw.cmake.cdt.lsp.config.release.toolChain.2019753646" name="CMake driven" superClass="de.marw.cmake.cdt.lsp.config.release.toolChain">
 							<targetPlatform id="de.marw.cmake.cdt.lsp.targetPlatform.cmake.2132388874" name="Any Platform" superClass="de.marw.cmake.cdt.lsp.targetPlatform.cmake"/>
 							<builder buildPath="/lcd/build/Release" id="de.marw.cmake.cdt.lsp.builder.portable.1266293875" managedBuildOn="true" name="CMake Builder.Release" superClass="de.marw.cmake.cdt.lsp.builder.portable"/>
-							<tool id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy.120040498" name="CMake driven Languages Proxy" superClass="de.marw.cmake.cdt.lsp.toolchain.tool.dummy"/>
+							<tool id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy.120040498" name="CMake driven Languages Proxy" superClass="de.marw.cmake.cdt.lsp.toolchain.tool.dummy">
+								<inputType id="de.marw.cmake.cdt.lsp.inputType.c.619757829" superClass="de.marw.cmake.cdt.lsp.inputType.c"/>
+								<inputType id="de.marw.cmake.cdt.lsp.inputType.cpp.1786497440" superClass="de.marw.cmake.cdt.lsp.inputType.cpp"/>
+							</tool>
 						</toolChain>
 					</folderInfo>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="de.marw.cdt.cmake.core.settings">
 				<linux command="cmake" generator="UnixMakefiles" use-default="true">
-					<defs/>
-					<undefs/>
 				</linux>
 				<win32 command="cmake" generator="UnixMakefiles" use-default="true">
-					<defs/>
-					<undefs/>
 				</win32>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

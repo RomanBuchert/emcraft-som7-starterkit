@@ -9,6 +9,7 @@
 #define LCD_TEST_RCC_H_
 
 #include <stdint.h>
+#include <libopencm3/stm32/rcc.h>
 
 struct rcc_sai_pll{
 	uint32_t vco_mhz;

@@ -20,6 +20,7 @@ add_executable(${THIS_TARGET_NAME}
 	lcd.c				# STM32F7 LTDC initialization for em-craft module
 	gt911.c				# Touch driver on em-craft module
 	buttons.c			# Simple functions for hardware user buttons 1  & 2  
+	uart.c
 )
 target_link_options(${THIS_TARGET_NAME}
 	PRIVATE -T stm32f746ng.ld -Wl,-Map=${THIS_TARGET_NAME}.map

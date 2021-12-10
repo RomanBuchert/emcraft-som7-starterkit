@@ -106,11 +106,13 @@ static size_t systimer_find_free_index(uint64_t* var) {
 	// At first, lookup if var is already in list.
 	index = systimer_find_var_index(var);
 	if (index != SIZE_MAX) {
+		timeouts[index] = var;
 		return index;
 	}
 	//Var is not in list, find empty list entry
 	index = systimer_find_emtpy_index();
 	if (index != SIZE_MAX) {
+		timeouts[index] = var;
 		return index;
 	}
  	// resize timeoutlist
@@ -139,5 +141,6 @@ static inline void systimer_handle_timeouts() {
 void sys_tick_handler() {
 	systick++;
 	systimer_handle_timeouts();
+	int2led();
 }
 

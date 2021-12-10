@@ -121,7 +121,25 @@ void gt911_init_i2c() {
 
 }
 
-int gt911_set_reg(uint16_t reg) {
+uint8_t gt911_set_reg(uint16_t reg) {
+}
+
+uint8_t gt911_calc_config_checksum() {
+	uint8_t checksum = 0;
+	uint8_t data;
+	for (size_t i = 0x8047; i < 0x80FF; i++) {
+		gt911_read(i, &data, 1);
+		checksum += data;
+	}
+	checksum = -checksum;
+	return checksum;
+}
+
+void gt911_update_config() {
+	uint8_t new_checksum = gt911_calc_config_checksum();
+	uint8_t update = 1;
+	gt911_write(0x80FF, &new_checksum, 1);
+	gt911_write(0x8100, &update, 1);
 }
 
 int gt911_read(uint16_t reg, void* data, size_t size) {
@@ -216,6 +234,7 @@ int gt911_read(uint16_t reg, void* data, size_t size) {
 		i2c_send_stop(gt911_i2c_device);
 	}
 #endif
+	systimer_remove_timeout(&timeout);
 	return retval;
 }
 
@@ -297,4 +316,207 @@ int gt911_write(uint16_t reg, void* data, size_t size) {
 	}
 	free(cdata_org);
 	return retval;
+}
+
+#include <stdio.h>
+extern int uart_getchar();
+extern int uart_kbhit();
+
+static void gt911_print_clear() {
+	printf("\033[2J\033[1;1H");
+	fflush(stdout);
+}
+
+static void gt911_print_gotoxy(int x, int y) {
+	printf("\033[%d;%dH", y ,x);
+	fflush(stdout);
+}
+
+static void gt911_print_header(char c) {
+	for (size_t i = 0; i < 80; i++) {
+		putchar(c);
+	}
+	puts("");
+}
+
+static void gt911_print_mid(const char* string) {
+	size_t str_len = strlen(string);
+	size_t pos;
+	putchar('|');
+	for (pos = 1; pos < (80 - str_len) / 2; pos++ ) {
+		putchar(' ');
+	}
+	printf("%s", string);
+	pos += str_len;
+	for (; pos < 79; pos++) {
+		putchar(' ');
+	}
+	puts("|");
+}
+
+static void gt911_print_menuitem(const char* name, const char key) {
+	size_t name_len = strlen(name);
+	size_t pos;
+	printf("| %s ", name);
+	pos = name_len + 3;
+	for (; pos < 74; pos++) {
+		putchar('.');
+	}
+	printf(" [%c] |", key);
+	puts("");
+}
+
+
+static void gt911_print_info() {
+	int ch;
+	char string[80];
+	struct gt911_info_struct info;
+	do {
+		gt911_read(0x8140, &info, sizeof(info));
+		gt911_print_clear();
+		gt911_print_header('=');
+		gt911_print_mid("GD911 Info");
+		gt911_print_header('-');
+		char* product_id = (char*) &info.ProductID;
+		sprintf(string, "Product ID: %c%c%c%c", *(product_id++), *(product_id++),*(product_id++),*(product_id++));
+		gt911_print_mid(string);
+		sprintf(string, "Firmware Version: %2.2x", info.FwVersion);
+		gt911_print_mid(string);
+		sprintf(string, "X-Resolution: %d", info.XResolution);
+		gt911_print_mid(string);
+		sprintf(string, "Y-Resolution: %d", info.YResolution);
+		gt911_print_mid(string);
+		sprintf(string, "Vendor ID: %d", info.VendorId);
+		gt911_print_mid(string);
+		gt911_print_mid("");
+		gt911_print_menuitem("Quit", 'q');
+		gt911_print_header('=');
+
+		ch = uart_getchar();
+	}while (ch != 'q');
+}
+
+static void gt911_print_read_data() {
+	int ch = 0;
+	static uint32_t first_reg;
+	uint8_t reg_val[32];
+	char string[80];
+	do {
+		gt911_print_clear();
+		fflush(stdout);
+		fflush(stdin);
+		printf("First register: ");
+		fflush(stdout);
+		fflush(stdin);
+		gets(string);
+		sscanf(string, "%x", &first_reg);
+		gt911_print_clear();
+		do {
+			gt911_read(first_reg, reg_val, 64);
+			gt911_print_gotoxy(1, 1);
+			gt911_print_header('=');
+			gt911_print_mid("GD911 Info");
+			gt911_print_header('-');
+			for (size_t i = 0; i < 64; i++) {
+				sprintf(string, "Reg: %4.4X = %2.2X %3i %+4d", first_reg + i, reg_val[i], reg_val[i], (int8_t)reg_val[i]);
+				gt911_print_mid(string);
+			}
+			gt911_print_mid("");
+			gt911_print_menuitem("Quit", 'q');
+			gt911_print_header('=');
+			ch = 0;
+			gt911_write(0x814E, &ch, 1);
+			systimer_delay_ms(5);
+		} while (!uart_kbhit());
+		ch = uart_getchar();
+	} while (ch != 'q');
+}
+
+static void gt911_print_touchpoints() {
+	int ch = 0;
+	static struct gt911_positions_struct positions;
+
+	static char string[80];
+	gt911_print_clear();
+	do {
+		gt911_print_gotoxy(1, 1);
+		gt911_print_header('=');
+		gt911_print_mid("GD911 Info");
+		gt911_print_header('-');
+		gt911_read(0x814e, &positions, sizeof(struct gt911_positions_struct));
+		if (positions.Info.BufferStatus) {
+			sprintf(string, "Status: %2.2X           ", positions.Info.Value);
+			gt911_print_mid(string);
+			sprintf(string, "   Buffer: %1d          ", positions.Info.BufferStatus);
+			gt911_print_mid(string);
+			sprintf(string, "   Large Detect: %1d    ", positions.Info.LargeDetect);
+			gt911_print_mid(string);
+			sprintf(string, "   Proximity Valid: %1d ", positions.Info.ProximityValid);
+			gt911_print_mid(string);
+			sprintf(string, "   Have Key: %1d        ", positions.Info.HaveKey);
+			gt911_print_mid(string);
+			sprintf(string, "   Number of Points: %1d", positions.Info.Touchpoints);
+			gt911_print_mid(string);
+			sprintf(string, "TrackId: %d", positions.TrackId);
+			gt911_print_mid(string);
+			for (size_t i = 0; i < 5; i++) {
+				if (i < positions.Info.Touchpoints) {
+					sprintf(string, "X: %4d, Y: %4d, Size: %4d, Id: %1d",
+							positions.Point[i].X,
+							positions.Point[i].Y,
+							positions.Point[i].Size,
+							positions.Point[i].TrackId
+					);
+					gt911_print_mid(string);
+				}
+				else {
+					gt911_print_mid("");
+				}
+			}
+			gt911_print_mid("");
+			gt911_print_menuitem("Quit", 'q');
+			gt911_print_header('=');
+			ch = 0;
+			gt911_write(0x814E, &ch, 1);
+		}
+		systimer_delay_ms(5);
+		ch = 0;
+		if (uart_kbhit()) {
+			ch = uart_getchar();
+		}
+	} while (ch != 'q');
+
+}
+
+void gt911_debug() {
+	int ch;
+	do {
+		printf("\33[?25l");
+		fflush(stdout);
+		gt911_print_clear();
+		gt911_print_header('=');
+		gt911_print_mid("GD911 Info");
+		gt911_print_header('-');
+		gt911_print_menuitem("Read Info", '1');
+		gt911_print_menuitem("Read Data", '2');
+		gt911_print_menuitem("Touchpoints", '3');
+		gt911_print_mid("");
+		gt911_print_menuitem("Quit", 'q');
+		gt911_print_header('=');
+		ch = uart_getchar();
+		switch (ch) {
+		case '1':
+			gt911_print_info();
+			break;
+		case '2':
+			gt911_print_read_data();
+			break;
+		case '3':
+			gt911_print_touchpoints();
+			break;
+		default:
+			break;
+		}
+	} while (ch != 'q');
+	gt911_print_clear();
 }

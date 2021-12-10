@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/fsmc.h>
@@ -16,6 +17,15 @@
 #include <gt911.h>
 #include <lcd.h>
 #include <systimer.h>
+#include <uart.h>
+
+int _write(int fd, char* ptr, int len) {
+	return uart_write(fd, ptr, len);
+}
+
+int _read(int fd, char* ptr, int len) {
+	return uart_read(fd, ptr, len);
+}
 
 void SetPixel(size_t x, size_t y, uint32_t c);
 
@@ -29,6 +39,7 @@ void int2led(void) {
 }
 
 void main() {
+	int number;
 	bool DisplayOn = true;
 	rcc_clock_setup_hse(&rcc_3v3[RCC_CLOCK_3V3_216MHZ], 12);
 	rcc_periph_clock_enable(RCC_GPIOD);
@@ -36,6 +47,7 @@ void main() {
 	gpio_set_output_options(GPIOD, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, GPIO3);
 	gpio_clear(GPIOD, GPIO3);
 	systimer_init();
+	uart_init(&uart_usart1_8n1_115200);
 	i2c_init_regs();
 	button_init();
 	sdram_init();
@@ -47,6 +59,13 @@ void main() {
 	lcd_init();
 	lcd_set_backlight(0);
 	gt911_init();
+	uint8_t data;
+	gt911_read(0x804d, &data, 1);
+	data &= ~0x08;
+	gt911_write(0x804d, &data, 1);
+	gt911_read(0x804d, &data, 1);
+	gt911_update_config();
+	gt911_debug();
 #if 0
 	for(uint32_t* addr = (uint32_t*)0xC0000000; addr < (uint32_t*)0xC4000000; addr++) {
 		*addr = 0;
@@ -74,6 +93,7 @@ void main() {
 	if (retval != 0) {
 		gt911_init();
 	}
+
 	for (;;) {
 		while (gpio_get(GPIOI, GPIO10) == 0) {
 			;

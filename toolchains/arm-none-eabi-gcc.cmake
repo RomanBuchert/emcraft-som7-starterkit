@@ -40,6 +40,10 @@ set(TC_OPTIMIZATION_LANGSTD_C "" CACHE STRING "Language standard (--std=)")
 set(TC_OPTIMIZATION_LANGSTD_CXX "" CACHE STRING "Language standard (--std=)")
 set(TC_OPTIMIZATION_OTHER "" CACHE STRING "Other optimization flags")
 
+if(WIN32)
+	set(CMAKE_EXECUTABLE_SUFFIX .exe)
+endif()
+
 # Debug
 set (TC_DEBUG_LEVEL_LIST
 	""	#None
