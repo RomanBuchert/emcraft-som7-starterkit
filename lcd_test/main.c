@@ -19,6 +19,28 @@
 #include <systimer.h>
 #include <uart.h>
 
+static const void* heap_end = (void*)0xC4000000;
+static void* heap_start = NULL;
+static void* prev_heap_end = NULL;
+static void* curr_heap_end = NULL;
+
+void* _sbrk(int incr) {
+	if (heap_start == NULL) {
+		heap_start = (void*)(heap_end - (1024*1024));
+	}
+	if (curr_heap_end == NULL) {
+		curr_heap_end = heap_start;
+	}
+	prev_heap_end = curr_heap_end;
+	if ((curr_heap_end + incr) < heap_end) {
+		curr_heap_end += incr;
+	}
+	else {
+		return (void*)-1;
+	}
+	return (void*)prev_heap_end;
+}
+
 int _write(int fd, char* ptr, int len) {
 	return uart_write(fd, ptr, len);
 }
@@ -46,11 +68,11 @@ void main() {
 	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO3);
 	gpio_set_output_options(GPIOD, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, GPIO3);
 	gpio_clear(GPIOD, GPIO3);
+	sdram_init();
 	systimer_init();
 	uart_init(&uart_usart1_8n1_115200);
 	i2c_init_regs();
 	button_init();
-	sdram_init();
 	/*
 	while(!button_get(USR_BTN1)) {
 		;
@@ -59,12 +81,14 @@ void main() {
 	lcd_init();
 	lcd_set_backlight(0);
 	gt911_init();
+#if 0
 	uint8_t data;
 	gt911_read(0x804d, &data, 1);
 	data &= ~0x08;
 	gt911_write(0x804d, &data, 1);
 	gt911_read(0x804d, &data, 1);
 	gt911_update_config();
+#endif
 	gt911_debug();
 #if 0
 	for(uint32_t* addr = (uint32_t*)0xC0000000; addr < (uint32_t*)0xC4000000; addr++) {
