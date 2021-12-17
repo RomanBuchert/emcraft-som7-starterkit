@@ -25,7 +25,7 @@
 					<folderInfo id="de.marw.cmake.cdt.lsp.config.debug.213749388." name="/" resourcePath="">
 						<toolChain id="de.marw.cmake.cdt.lsp.config.debug.toolChain.1285386354" name="CMake driven" superClass="de.marw.cmake.cdt.lsp.config.debug.toolChain">
 							<targetPlatform id="de.marw.cmake.cdt.lsp.targetPlatform.cmake.359093023" name="Any Platform" superClass="de.marw.cmake.cdt.lsp.targetPlatform.cmake"/>
-							<builder buildPath="/lcd/build/Debug" id="de.marw.cmake.cdt.lsp.builder.portable.243267062" managedBuildOn="true" name="CMake Builder.Debug" superClass="de.marw.cmake.cdt.lsp.builder.portable"/>
+							<builder buildPath="/lcd/build/Debug" id="de.marw.cmake.cdt.lsp.builder.portable.243267062" incrementalBuildTarget="all VERBOSE=1" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CMake Builder" superClass="de.marw.cmake.cdt.lsp.builder.portable"/>
 							<tool id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy.167005487" name="CMake driven Languages Proxy" superClass="de.marw.cmake.cdt.lsp.toolchain.tool.dummy">
 								<inputType id="de.marw.cmake.cdt.lsp.inputType.c.344479412" superClass="de.marw.cmake.cdt.lsp.inputType.c"/>
 								<inputType id="de.marw.cmake.cdt.lsp.inputType.cpp.1033762544" superClass="de.marw.cmake.cdt.lsp.inputType.cpp"/>
@@ -35,6 +35,15 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="ilg.gnumcueclipse.managedbuild.packs"/>
+			<storageModule moduleId="de.marw.cdt.cmake.core.settings">
+				<linux command="cmake" generator="UnixMakefiles" use-default="true">
+					<defs/>
+					<undefs/>
+				</linux>
+				<win32 command="cmake" generator="UnixMakefiles" use-default="true">
+				</win32>
+			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="de.marw.cmake.cdt.lsp.config.cmake.470366935">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="de.marw.cmake.cdt.lsp.config.cmake.470366935" moduleId="org.eclipse.cdt.core.settings" name="Default">
@@ -120,6 +129,16 @@
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Default">
+			<resource resourceType="PROJECT" workspacePath="/lcd"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/lcd"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/lcd"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>

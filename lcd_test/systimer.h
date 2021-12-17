@@ -11,8 +11,8 @@
 #include <stdint.h>
 
 void systimer_init();
-void systimer_delay_ms(uint64_t ms);
-uint64_t systimer_get_ms();
-int systimer_add_timeout(uint64_t* var, uint64_t timeout);
-int systimer_remove_timeout(uint64_t* var);
+void systimer_delay_ms(uint32_t ms);
+uint32_t systimer_get_ms();
+int systimer_add_timeout(uint32_t* var, uint32_t timeout);
+int systimer_remove_timeout(uint32_t* var);
 #endif /* LCD_TEST_SYSTIMER_H_ */

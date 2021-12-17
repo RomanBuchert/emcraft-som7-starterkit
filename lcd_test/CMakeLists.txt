@@ -13,6 +13,7 @@ set(LCD_TEST_XRAM_SIZE "8M" CACHE STRING "External RAM size.")
 
 add_executable(${THIS_TARGET_NAME} 
 	main.c				# Main
+	mpu.c				# Memory protection unit
 	systimer.c			# System timer functions 
 	rcc.c				# Further clock configuration functions for SAI clock tree
 	i2c.c				# Further i2c functions not implemente in libopencm3

@@ -14,11 +14,12 @@
 
 #include <libopencm3/cm3/systick.h>
 #include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/gpio.h>
 
 extern void int2led(void);
 
-static uint64_t systick = 0;
-static uint64_t** timeouts = NULL ;
+volatile uint32_t systick_value = 0;
+static uint32_t** timeouts = NULL ;
 static size_t allocated_timeouts = 0;
 
 static uint32_t systick_is_initialized = 0;
@@ -26,9 +27,9 @@ static uint32_t systick_is_initialized = 0;
 /**
  * Local prototypes
  */
-static size_t systimer_find_var_index(uint64_t *var);
+static size_t systimer_find_var_index(uint32_t *var);
 static size_t systimer_find_emtpy_index();
-static size_t systimer_find_free_index(uint64_t* var);
+static size_t systimer_find_free_index(uint32_t* var);
 static inline void systimer_handle_timeouts();
 
 /**
@@ -44,18 +45,18 @@ void systimer_init() {
 	systick_is_initialized = 1;
 }
 
-void systimer_delay_ms(uint64_t ms) {
-	uint64_t end = systick + ms;
-	while (systick < end) {
+void systimer_delay_ms(uint32_t ms) {
+	uint32_t delay_end = systick_value + ms;
+	while (delay_end > systick_value) {
 		;
 	}
 }
 
-uint64_t systimer_get_ms() {
-	return systick;
+uint32_t systimer_get_ms() {
+	return systick_value;
 }
 
-int systimer_add_timeout(uint64_t* var, uint64_t timeout) {
+int systimer_add_timeout(uint32_t* var, uint32_t timeout) {
 	if (systimer_find_free_index(var) != SIZE_MAX) {
 		*var = timeout;
 		errno = 0;
@@ -65,7 +66,7 @@ int systimer_add_timeout(uint64_t* var, uint64_t timeout) {
 	return -1;
 }
 
-int systimer_remove_timeout(uint64_t* var) {
+int systimer_remove_timeout(uint32_t* var) {
 	size_t index = systimer_find_var_index(var);
 	if (index != SIZE_MAX) {
 		timeouts[index] = NULL;
@@ -80,7 +81,7 @@ int systimer_remove_timeout(uint64_t* var) {
  * Local functions
  */
 
-static size_t systimer_find_var_index(uint64_t *var) {
+static size_t systimer_find_var_index(uint32_t *var) {
 	// is var already in list
 	for (size_t i = 0; i < allocated_timeouts; i++) {
 		if (timeouts[i] == var) {
@@ -101,7 +102,7 @@ static size_t systimer_find_emtpy_index() {
 	return SIZE_MAX;
 }
 
-static size_t systimer_find_free_index(uint64_t* var) {
+static size_t systimer_find_free_index(uint32_t* var) {
 	size_t index = SIZE_MAX;
 	// At first, lookup if var is already in list.
 	index = systimer_find_var_index(var);
@@ -116,7 +117,7 @@ static size_t systimer_find_free_index(uint64_t* var) {
 		return index;
 	}
  	// resize timeoutlist
-	uint64_t** new_timeouts = realloc(timeouts, (allocated_timeouts + 1) * sizeof(uint64_t*));
+	uint32_t** new_timeouts = realloc(timeouts, (allocated_timeouts + 1) * sizeof(uint32_t*));
 	if (new_timeouts != NULL) {
 		timeouts = new_timeouts;
 		timeouts[allocated_timeouts] = var;
@@ -139,8 +140,9 @@ static inline void systimer_handle_timeouts() {
  * Systick interrupt handler
  */
 void sys_tick_handler() {
-	systick++;
+	GPIOD_BSRR |= GPIO3;
+	systick_value++;
 	systimer_handle_timeouts();
-	int2led();
+	GPIOD_BSRR |= (GPIO3 << 16);
 }
 

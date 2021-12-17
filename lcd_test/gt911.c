@@ -124,28 +124,28 @@ void gt911_init_i2c() {
 uint8_t gt911_set_reg(uint16_t reg) {
 }
 
-uint8_t gt911_calc_config_checksum() {
+uint8_t gt911_calc_config_checksum(struct gt911_config_struct* config) {
 	uint8_t checksum = 0;
 	uint8_t data;
-	for (size_t i = 0x8047; i < 0x80FF; i++) {
-		gt911_read(i, &data, 1);
-		checksum += data;
+	uint8_t* cfg_ptr = (uint8_t*) config;
+	for (size_t i = 0; i < (sizeof(struct gt911_config_struct)-2); i++) {
+		checksum += *cfg_ptr++;
 	}
 	checksum = -checksum;
+	config->ConfigChecksum = checksum;
 	return checksum;
 }
 
-void gt911_update_config() {
-	uint8_t new_checksum = gt911_calc_config_checksum();
-	uint8_t update = 1;
-	gt911_write(0x80FF, &new_checksum, 1);
-	gt911_write(0x8100, &update, 1);
+void gt911_update_config(struct gt911_config_struct* config) {
+	uint8_t new_checksum = gt911_calc_config_checksum(config);
+	config->ConfigFresh = 1;
+	gt911_write(0x8047, config, sizeof(struct gt911_config_struct));
 }
 
 int gt911_read(uint16_t reg, void* data, size_t size) {
 
 	uint16_t tmpreg = __htons(reg);
-	uint64_t timeout;
+	uint32_t timeout;
 	int retval = -2;
 	char* cdata = (char*) &tmpreg;
 	size_t retries = 3;
@@ -241,15 +241,29 @@ int gt911_read(uint16_t reg, void* data, size_t size) {
 int gt911_write(uint16_t reg, void* data, size_t size) {
 	uint16_t tmpreg = __htons(reg);
 	uint64_t timeout;
+	uint8_t* tmpptr;
 	int retval = -2;
 	char* cdata = calloc(size + 2, 1);
 	char* cdata_org = cdata;
 	if (cdata == NULL) {
 		return -3;
 	}
-	memcpy(cdata, &tmpreg, 2);
-	memcpy(&cdata[2], data, size);
 
+	memcpy(cdata, &tmpreg, 2);
+	/*
+	tmpptr = (uint8_t*) &tmpreg;
+	for (size_t i = 0; i < 2; i++) {
+		*cdata++ = *tmpptr++;
+	}
+	*/
+
+	memcpy(&cdata[2], data, size);
+	/*
+	tmpptr = (uint8_t*) data;
+	for(size_t i = 0; i < size; i++) {
+		*cdata++ = *tmpptr++;
+	}
+	*/
 	size_t retries = 3;
 	do {
 		// Prepare communication to send the register address
@@ -336,7 +350,7 @@ static void gt911_print_header(char c) {
 	for (size_t i = 0; i < 80; i++) {
 		putchar(c);
 	}
-	puts("");
+	puts(" ");
 }
 
 static void gt911_print_mid(const char* string) {
